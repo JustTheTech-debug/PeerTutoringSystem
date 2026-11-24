@@ -14,6 +14,10 @@ class OfferRepository(private val db: AppDatabase) {
 
     fun getOffersForRequest(requestId: Int): LiveData<List<TutorOffer>> =
         offerDao.getOffersForRequest(requestId)
+import com.example.peertutoringsystem.data.local.OfferDao
+import com.example.peertutoringsystem.data.model.TutorOffer
+
+class OfferRepository(private val offerDao: OfferDao) {
 
     fun getOffersByTutor(tutorId: Int): LiveData<List<TutorOffer>> =
         offerDao.getOffersByTutor(tutorId)
@@ -77,4 +81,21 @@ class OfferRepository(private val db: AppDatabase) {
     private fun teachesSubject(tutorSubjects: String, requestSubject: String): Boolean =
         tutorSubjects.split(",").map { it.trim() }
             .any { it.equals(requestSubject.trim(), ignoreCase = true) }
+}
+    suspend fun updateOffer(offer: TutorOffer) {
+        offerDao.updateOffer(offer)
+    }
+
+    suspend fun insertOffer(offer: TutorOffer): Long {
+        return offerDao.insertOffer(offer)
+    }
+
+    suspend fun withdrawOffer(offer: TutorOffer) {
+        val updated = offer.copy(status = "WITHDRAWN")
+        offerDao.updateOffer(updated)
+    }
+
+    suspend fun getOfferById(offerId: Int): TutorOffer? {
+        return offerDao.getOfferById(offerId)
+    }
 }

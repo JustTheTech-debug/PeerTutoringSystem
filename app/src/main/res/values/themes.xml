@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 
-    <style name="Theme.PeerTutoringSystem" parent="android:Theme.Material.Light.NoActionBar" />
+    <style name="Theme.PeerTutoringSystem" parent="Theme.AppCompat.Light.NoActionBar" />
     <!-- Shared Text Styles -->
     <style name="TextHeader">
         <item name="android:textSize">24sp</item>
