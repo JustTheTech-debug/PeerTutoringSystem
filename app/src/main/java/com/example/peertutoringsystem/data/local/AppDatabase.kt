@@ -17,6 +17,7 @@ abstract class AppDatabase : RoomDatabase() {
 
     // Each member adds ONE line here for their own DAO, for example:
     abstract fun requestDao(): RequestDao
+    abstract fun sessionDao(): SessionDao
 
     companion object {
         @Volatile
