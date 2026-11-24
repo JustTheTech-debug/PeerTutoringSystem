@@ -15,5 +15,6 @@ class OffersForRequestFragment : Fragment() {
         return inflater.inflate(android.R.layout.simple_list_item_1, container, false).apply {
             findViewById<TextView>(android.R.id.text1).text = "Offers for Request Screen"
         }
+
     }
 }

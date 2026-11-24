@@ -5,11 +5,11 @@
     android:id="@+id/nav_graph"
     app:startDestination="@id/roleSelectFragment">
 
-    <!-- AUTH SCREENS -->
+    <!-- Auth Flow (Member 1) -->
     <fragment
         android:id="@+id/roleSelectFragment"
         android:name="com.example.peertutoringsystem.ui.auth.RoleSelectFragment"
-        android:label="Role Select"
+        android:label="Role Selection"
         tools:layout="@android:layout/simple_list_item_1">
         <action
             android:id="@+id/action_roleSelect_to_login"
@@ -17,6 +17,11 @@
         <action
             android:id="@+id/action_roleSelect_to_register"
             app:destination="@id/registerFragment" />
+        <action
+            android:id="@+id/action_roleSelect_to_home"
+            app:destination="@id/homeFragment"
+            app:popUpTo="@id/roleSelectFragment"
+            app:popUpToInclusive="true" />
     </fragment>
 
     <fragment
@@ -25,9 +30,12 @@
         android:label="Login"
         tools:layout="@android:layout/simple_list_item_1">
         <action
+            android:id="@+id/action_login_to_register"
+            app:destination="@id/registerFragment" />
+        <action
             android:id="@+id/action_login_to_home"
             app:destination="@id/homeFragment"
-            app:popUpTo="@id/nav_graph"
+            app:popUpTo="@id/roleSelectFragment"
             app:popUpToInclusive="true" />
     </fragment>
 
@@ -36,31 +44,62 @@
         android:name="com.example.peertutoringsystem.ui.auth.RegisterFragment"
         android:label="Register"
         tools:layout="@android:layout/simple_list_item_1">
+
+
+        <argument
+            android:name="role"
+            app:argType="string"
+            android:defaultValue="STUDENT" />
+
+
         <action
             android:id="@+id/action_register_to_login"
-            app:destination="@id/loginFragment"
-            app:popUpTo="@id/registerFragment"
+            app:destination="@id/loginFragment" />
+        <action
+            android:id="@+id/action_register_to_home"
+            app:destination="@id/homeFragment"
+            app:popUpTo="@id/roleSelectFragment"
             app:popUpToInclusive="true" />
     </fragment>
 
-    <!-- HOME & PROFILE -->
+    <!-- Home (Member 6) -->
     <fragment
         android:id="@+id/homeFragment"
         android:name="com.example.peertutoringsystem.ui.main.HomeFragment"
         android:label="Home"
-        tools:layout="@android:layout/simple_list_item_1" />
+        tools:layout="@android:layout/simple_list_item_1">
+        <action
+            android:id="@+id/action_home_to_requestList"
+            app:destination="@id/requestListFragment" />
+        <action
+            android:id="@+id/action_home_to_requestForm"
+            app:destination="@id/requestFormFragment" />
+        <action
+            android:id="@+id/action_home_to_myOffers"
+            app:destination="@id/myOffersFragment" />
+        <action
+            android:id="@+id/action_home_to_sessionsList"
+            app:destination="@id/sessionsListFragment" />
+    </fragment>
 
+    <!-- Profile (Member 4) -->
     <fragment
         android:id="@+id/profileFragment"
         android:name="com.example.peertutoringsystem.ui.profile.ProfileFragment"
         android:label="Profile"
-        tools:layout="@android:layout/simple_list_item_1" />
+        tools:layout="@android:layout/simple_list_item_1">
+        <action
+            android:id="@+id/action_profile_to_roleSelect"
+            app:destination="@id/roleSelectFragment"
+            app:popUpTo="@id/nav_graph"
+            app:popUpToInclusive="true" />
+    </fragment>
 
-    <!-- REQUESTS -->
+    <!-- Requests (Members 2 & 6) -->
     <fragment
         android:id="@+id/requestListFragment"
         android:name="com.example.peertutoringsystem.ui.requests.RequestListFragment"
-        android:label="Request List"
+        android:label="Requests"
         tools:layout="@android:layout/simple_list_item_1">
         <action
             android:id="@+id/action_requestList_to_requestForm"
@@ -73,36 +112,57 @@
     <fragment
         android:id="@+id/requestFormFragment"
         android:name="com.example.peertutoringsystem.ui.requests.RequestFormFragment"
-        android:label="Create/Edit Request"
-        tools:layout="@android:layout/simple_list_item_1" />
+        android:label="Create / Edit Request"
+        tools:layout="@android:layout/simple_list_item_1">
+        <argument
+            android:name="requestId"
+            android:defaultValue="-1"
+            app:argType="integer" />
+    </fragment>
 
     <fragment
         android:id="@+id/requestDetailFragment"
         android:name="com.example.peertutoringsystem.ui.requests.RequestDetailFragment"
         android:label="Request Detail"
         tools:layout="@android:layout/simple_list_item_1">
+        <argument
+            android:name="requestId"
+            android:defaultValue="-1"
+            app:argType="integer" />
+        <action
+            android:id="@+id/action_requestDetail_to_requestForm"
+            app:destination="@id/requestFormFragment" />
         <action
             android:id="@+id/action_requestDetail_to_respond"
             app:destination="@id/respondFragment" />
         <action
-            android:id="@+id/action_requestDetail_to_offers"
+            android:id="@+id/action_requestDetail_to_offersForRequest"
             app:destination="@id/offersForRequestFragment" />
     </fragment>
 
-    <!-- OFFERS -->
+    <!-- Offers (Members 3 & 4) -->
     <fragment
         android:id="@+id/respondFragment"
         android:name="com.example.peertutoringsystem.ui.offers.RespondFragment"
         android:label="Respond to Request"
-        tools:layout="@android:layout/simple_list_item_1" />
+        tools:layout="@android:layout/simple_list_item_1">
+        <argument
+            android:name="requestId"
+            android:defaultValue="-1"
+            app:argType="integer" />
+    </fragment>
 
     <fragment
         android:id="@+id/offersForRequestFragment"
         android:name="com.example.peertutoringsystem.ui.offers.OffersForRequestFragment"
         android:label="Offers for Request"
         tools:layout="@android:layout/simple_list_item_1">
+        <argument
+            android:name="requestId"
+            android:defaultValue="-1"
+            app:argType="integer" />
         <action
-            android:id="@+id/action_offers_to_schedule"
+            android:id="@+id/action_offersForRequest_to_scheduleSession"
             app:destination="@id/scheduleSessionFragment" />
     </fragment>
 
@@ -112,17 +172,30 @@
         android:label="My Offers"
         tools:layout="@android:layout/simple_list_item_1" />
 
-    <!-- SESSIONS -->
+    <!-- Sessions (Member 5) -->
     <fragment
         android:id="@+id/scheduleSessionFragment"
         android:name="com.example.peertutoringsystem.ui.sessions.ScheduleSessionFragment"
         android:label="Schedule Session"
-        tools:layout="@android:layout/simple_list_item_1" />
+        tools:layout="@android:layout/simple_list_item_1">
+        <argument
+            android:name="requestId"
+            android:defaultValue="-1"
+            app:argType="integer" />
+        <argument
+            android:name="offerId"
+            android:defaultValue="-1"
+            app:argType="integer" />
+        <action
+            android:id="@+id/action_scheduleSession_to_sessionsList"
+            app:destination="@id/sessionsListFragment"
+            app:popUpTo="@id/homeFragment" />
+    </fragment>
 
     <fragment
         android:id="@+id/sessionsListFragment"
         android:name="com.example.peertutoringsystem.ui.sessions.SessionsListFragment"
-        android:label="Sessions List"
+        android:label="Sessions"
         tools:layout="@android:layout/simple_list_item_1" />
 
 </navigation>
