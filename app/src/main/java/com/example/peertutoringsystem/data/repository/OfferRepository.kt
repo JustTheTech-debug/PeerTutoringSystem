@@ -18,21 +18,28 @@ class OfferRepository(private val db: AppDatabase) {
     fun getOffersByTutor(tutorId: Int): LiveData<List<TutorOffer>> =
         offerDao.getOffersByTutor(tutorId)
 
+    suspend fun getOfferById(offerId: Int): TutorOffer? =
+        offerDao.getOfferById(offerId)
+
     // Returns null if saved, or an error message to show the user
     suspend fun submitOffer(
         requestId: Int,
         tutorId: Int,
-        tutorSubjects: String,
         feeText: String,
         message: String
     ): String? {
+        if (tutorId == -1) return "Please log in again"
+
         val fee = feeText.trim().toIntOrNull()
         if (fee == null || fee <= 0) return "Enter a whole number above 0 for the fee"
         if (!Validator.isNotBlank(message)) return "Message cannot be blank"
 
+        val tutor = db.userDao().getUserByIdSync(tutorId) ?: return "Tutor not found"
+        if (tutor.role != "TUTOR") return "Only tutors can send offers"
+
         val request = requestDao.getRequestById(requestId) ?: return "Request not found"
         if (request.status != "OPEN") return "This request is no longer open"
-        if (!teachesSubject(tutorSubjects, request.subject)) return "You do not teach ${request.subject}"
+        if (!teachesSubject(tutor.subjects, request.subject)) return "You do not teach ${request.subject}"
         if (offerDao.findExistingOffer(requestId, tutorId) != null) return "You already sent an offer for this request"
 
         offerDao.insertOffer(
@@ -65,30 +72,12 @@ class OfferRepository(private val db: AppDatabase) {
         return null
     }
 
-    // For Member 4 (My Offers)
+    // For Member 4 (My Offers): accepted offers cannot be withdrawn
     suspend fun withdrawOffer(offerId: Int): Boolean {
         val offer = offerDao.getOfferById(offerId) ?: return false
         if (offer.status == "ACCEPTED") return false
         offerDao.updateStatus(offerId, "WITHDRAWN")
         return true
-    }
-
-    // Helper functions merged from the second class
-    suspend fun updateOffer(offer: TutorOffer) {
-        offerDao.updateOffer(offer)
-    }
-
-    suspend fun insertOffer(offer: TutorOffer): Long {
-        return offerDao.insertOffer(offer)
-    }
-
-    suspend fun withdrawOffer(offer: TutorOffer) {
-        val updated = offer.copy(status = "WITHDRAWN")
-        offerDao.updateOffer(updated)
-    }
-
-    suspend fun getOfferById(offerId: Int): TutorOffer? {
-        return offerDao.getOfferById(offerId)
     }
 
     // "Mathematics,Physics" -> does it contain the request's subject?
