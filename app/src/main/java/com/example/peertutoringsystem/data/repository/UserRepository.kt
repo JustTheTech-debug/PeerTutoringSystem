@@ -17,4 +17,9 @@ class UserRepository(private val userDao: UserDao) {
     suspend fun insertUser(user: User): Long {
         return userDao.insertUser(user)
     }
+
+    //FOR THE LOGIN SCREEN ---
+    suspend fun login(phone: String, password: String): User? {
+        return userDao.login(phone, password)
+    }
 }
