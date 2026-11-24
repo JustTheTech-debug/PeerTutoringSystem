@@ -9,7 +9,7 @@ import com.example.peertutoringsystem.data.model.TutorOffer
 import com.example.peertutoringsystem.data.repository.OfferRepository
 import kotlinx.coroutines.launch
 
-class OfferViewModel(application: Application) : AndroidViewModel(application) {
+class OfferFlowViewModel(application: Application) : AndroidViewModel(application) {
 
     private val repository = OfferRepository(AppDatabase.getDatabase(application))
 

@@ -13,7 +13,7 @@ import com.example.peertutoringsystem.util.SessionManager
 
 class RespondFragment : Fragment(R.layout.fragment_respond) {
 
-    private val viewModel: OfferViewModel by viewModels()
+    private val viewModel: OfferFlowViewModel by viewModels()
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
