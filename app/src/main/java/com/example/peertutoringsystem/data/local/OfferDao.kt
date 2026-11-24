@@ -20,4 +20,9 @@ interface OfferDao {
 
     @Query("SELECT * FROM offers WHERE offerId = :offerId")
     suspend fun getOfferById(offerId: Int): TutorOffer?
+    @Query("SELECT * FROM offers WHERE requestId = :requestId AND tutorId = :tutorId LIMIT 1")
+    suspend fun findExistingOffer(requestId: Int, tutorId: Int): TutorOffer?
+
+    @Query("UPDATE offers SET status = :status WHERE offerId = :offerId")
+    suspend fun updateStatus(offerId: Int, status: String)
 }
