@@ -1,35 +1,46 @@
 package com.example.peertutoringsystem.ui.offers
 
+import android.app.Application
+import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.LiveData
-import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.peertutoringsystem.data.local.AppDatabase
 import com.example.peertutoringsystem.data.model.TutorOffer
 import com.example.peertutoringsystem.data.repository.OfferRepository
 import kotlinx.coroutines.launch
 
-class OfferViewModel(private val repo: OfferRepository) : ViewModel() {
+class OfferViewModel(application: Application) : AndroidViewModel(application) {
+
+    private val repository = OfferRepository(AppDatabase.getDatabase(application))
 
     fun offersForRequest(requestId: Int): LiveData<List<TutorOffer>> =
-        repo.getOffersForRequest(requestId)
+        repository.getOffersForRequest(requestId)
 
+    fun offersByTutor(tutorId: Int): LiveData<List<TutorOffer>> =
+        repository.getOffersByTutor(tutorId)
+
+    // onResult gets null when saved, or an error message for the screen to show
     fun submitOffer(
         requestId: Int,
         tutorId: Int,
-        tutorSubjects: String,
         feeText: String,
         message: String,
         onResult: (String?) -> Unit
     ) {
         viewModelScope.launch {
-            val error = repo.submitOffer(requestId, tutorId, tutorSubjects, feeText, message)
-            onResult(error)
+            onResult(repository.submitOffer(requestId, tutorId, feeText, message))
         }
     }
 
     fun acceptOffer(offerId: Int, onResult: (Boolean) -> Unit) {
-        viewModelScope.launch {
-            val ok = repo.acceptOffer(offerId)
-            onResult(ok)
-        }
+        viewModelScope.launch { onResult(repository.acceptOffer(offerId)) }
+    }
+
+    fun editOffer(offer: TutorOffer, feeText: String, message: String, onResult: (String?) -> Unit) {
+        viewModelScope.launch { onResult(repository.editOffer(offer, feeText, message)) }
+    }
+
+    fun withdrawOffer(offerId: Int, onResult: (Boolean) -> Unit) {
+        viewModelScope.launch { onResult(repository.withdrawOffer(offerId)) }
     }
 }
