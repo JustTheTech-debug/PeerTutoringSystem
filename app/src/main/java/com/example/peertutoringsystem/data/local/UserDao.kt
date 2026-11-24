@@ -17,4 +17,8 @@ interface UserDao {
 
     @Query("SELECT * FROM users WHERE userId = :id")
     suspend fun getUserByIdSync(id: Int): User?
+
+    // --- FOR THE LOGIN SCREEN ---
+    @Query("SELECT * FROM users WHERE phone = :phone AND password = :password LIMIT 1")
+    suspend fun login(phone: String, password: String): User?
 }

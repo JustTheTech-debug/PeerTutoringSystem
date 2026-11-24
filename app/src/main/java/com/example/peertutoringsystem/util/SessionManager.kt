@@ -21,12 +21,14 @@ class SessionManager(context: Context) {
             .apply()
     }
 
+    // FIX 1: Default to -1, not 1
     fun getUserId(): Int {
-        return prefs.getInt(KEY_USER_ID, 1)
+        return prefs.getInt(KEY_USER_ID, -1)
     }
 
-    fun getRole(): String {
-        return prefs.getString(KEY_ROLE, "TUTOR") ?: "TUTOR"
+    // FIX 2: Default to empty string, not "TUTOR"
+    fun getRole(): String? {
+        return prefs.getString(KEY_ROLE, "")
     }
 
     fun isLoggedIn(): Boolean {

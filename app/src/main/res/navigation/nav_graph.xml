@@ -44,6 +44,14 @@
         android:name="com.example.peertutoringsystem.ui.auth.RegisterFragment"
         android:label="Register"
         tools:layout="@android:layout/simple_list_item_1">
+
+
+        <argument
+            android:name="role"
+            app:argType="string"
+            android:defaultValue="STUDENT" />
+
+
         <action
             android:id="@+id/action_register_to_login"
             app:destination="@id/loginFragment" />
