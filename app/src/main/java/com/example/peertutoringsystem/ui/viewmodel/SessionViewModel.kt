@@ -8,6 +8,7 @@ import androidx.lifecycle.viewModelScope
 import com.example.peertutoringsystem.data.local.AppDatabase
 import com.example.peertutoringsystem.data.model.Session
 import com.example.peertutoringsystem.data.repository.SessionRepository
+import com.example.peertutoringsystem.reminder.ReminderScheduler
 import kotlinx.coroutines.launch
 
 class SessionViewModel(application: Application) : AndroidViewModel(application) {
@@ -38,7 +39,10 @@ class SessionViewModel(application: Application) : AndroidViewModel(application)
             dateTime = dateTime, mode = mode,
             locationOrLink = locationOrLink.trim()
         )
-        viewModelScope.launch { repository.schedule(session) }
+        viewModelScope.launch {
+            val newId = repository.schedule(session).toInt()
+            ReminderScheduler.schedule(getApplication(), session.copy(sessionId = newId))
+        }
         return null
     }
 
@@ -49,17 +53,26 @@ class SessionViewModel(application: Application) : AndroidViewModel(application)
 
         viewModelScope.launch {
             repository.reschedule(sessionId, dateTime, locationOrLink.trim())
+            repository.getById(sessionId)?.let { updated ->
+                ReminderScheduler.schedule(getApplication(), updated)
+            }
         }
         return null
     }
 
     fun cancelSession(sessionId: Int) {
-        viewModelScope.launch { repository.cancel(sessionId) }
+        viewModelScope.launch {
+            repository.cancel(sessionId)
+            ReminderScheduler.cancel(getApplication(), sessionId)
+        }
     }
 
     // Sets the session and its request to COMPLETED
     fun markCompleted(session: Session) {
-        viewModelScope.launch { repository.markCompleted(session) }
+        viewModelScope.launch {
+            repository.markCompleted(session)
+            ReminderScheduler.cancel(getApplication(), session.sessionId)
+        }
     }
 
     private fun checkInput(dateTime: Long, mode: String, locationOrLink: String): String? {
