@@ -1,117 +1,35 @@
 package com.example.peertutoringsystem.ui.viewmodel
 
-import android.app.Application
-import androidx.lifecycle.*
-import com.example.peertutoringsystem.data.local.AppDatabase
+import androidx.lifecycle.LiveData
+import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
 import com.example.peertutoringsystem.data.model.TutorOffer
 import com.example.peertutoringsystem.data.repository.OfferRepository
-import com.example.peertutoringsystem.data.repository.SyncRepository
-import com.example.peertutoringsystem.data.repository.SyncResult
-import com.example.peertutoringsystem.util.Validator
 import kotlinx.coroutines.launch
 
-class OffersViewModel(application: Application) : AndroidViewModel(application) {
+class OffersViewModel(private val repo: OfferRepository) : ViewModel() {
 
-    private val offerRepository: OfferRepository
-    private val syncRepository: SyncRepository
+    fun offersForRequest(requestId: Int): LiveData<List<TutorOffer>> =
+        repo.getOffersForRequest(requestId)
 
-    private val tutorIdLiveData = MutableLiveData<Int>()
-
-    val myOffers: LiveData<List<TutorOffer>> = tutorIdLiveData.switchMap { tutorId ->
-        offerRepository.getOffersByTutor(tutorId)
-    }
-
-    val statusMessage = MutableLiveData<String?>()
-    val isLoading = MutableLiveData<Boolean>(false)
-
-    init {
-        val db = AppDatabase.getDatabase(application)
-        offerRepository = OfferRepository(db.offerDao())
-        syncRepository = SyncRepository(application)
-    }
-
-    fun setTutorId(tutorId: Int) {
-        if (tutorIdLiveData.value != tutorId) {
-            tutorIdLiveData.value = tutorId
-        }
-    }
-
-    fun editOffer(offer: TutorOffer, newFeeString: String, newMessage: String) {
-        if (offer.status == "ACCEPTED") {
-            statusMessage.value = "Accepted offers cannot be edited."
-            return
-        }
-
-        if (!Validator.isValidFee(newFeeString)) {
-            statusMessage.value = "Fee must be a valid number above 0."
-            return
-        }
-
-        if (!Validator.isNotBlank(newMessage)) {
-            statusMessage.value = "Message cannot be blank."
-            return
-        }
-
-        val newFee = newFeeString.trim().toIntOrNull() ?: 0
-
-        val updatedOffer = offer.copy(
-            fee = newFee,
-            message = newMessage.trim()
-        )
-
-        isLoading.value = true
-
+    fun submitOffer(
+        requestId: Int,
+        tutorId: Int,
+        tutorSubjects: String,
+        feeText: String,
+        message: String,
+        onResult: (String?) -> Unit
+    ) {
         viewModelScope.launch {
-            try {
-                offerRepository.updateOffer(updatedOffer)
-
-                val syncResult = syncRepository.syncOfferOnline(
-                    updatedOffer.offerId,
-                    updatedOffer.fee,
-                    updatedOffer.message
-                )
-
-                when (syncResult) {
-                    is SyncResult.Success -> statusMessage.value = "Offer updated and synced online."
-                    is SyncResult.Offline -> statusMessage.value = "Offer updated locally (${syncResult.message})"
-                    is SyncResult.Error -> statusMessage.value = "Offer updated locally. ${syncResult.message}"
-                }
-            } catch (e: Exception) {
-                statusMessage.value = "Error updating offer: ${e.localizedMessage}"
-            } finally {
-                isLoading.value = false
-            }
+            val error = repo.submitOffer(requestId, tutorId, tutorSubjects, feeText, message)
+            onResult(error)
         }
     }
 
-    fun withdrawOffer(offer: TutorOffer) {
-        if (offer.status == "ACCEPTED") {
-            statusMessage.value = "Accepted offers cannot be withdrawn."
-            return
-        }
-
-        isLoading.value = true
-
+    fun acceptOffer(offerId: Int, onResult: (Boolean) -> Unit) {
         viewModelScope.launch {
-            try {
-                offerRepository.withdrawOffer(offer)
-
-                val syncResult = syncRepository.syncOfferOnline(
-                    offer.offerId,
-                    offer.fee,
-                    "WITHDRAWN"
-                )
-
-                when (syncResult) {
-                    is SyncResult.Success -> statusMessage.value = "Offer withdrawn successfully."
-                    is SyncResult.Offline -> statusMessage.value = "Offer withdrawn locally (${syncResult.message})"
-                    is SyncResult.Error -> statusMessage.value = "Offer withdrawn locally. ${syncResult.message}"
-                }
-            } catch (e: Exception) {
-                statusMessage.value = "Error withdrawing offer: ${e.localizedMessage}"
-            } finally {
-                isLoading.value = false
-            }
+            val ok = repo.acceptOffer(offerId)
+            onResult(ok)
         }
     }
 }

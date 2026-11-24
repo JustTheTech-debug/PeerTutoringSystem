@@ -14,10 +14,6 @@ class OfferRepository(private val db: AppDatabase) {
 
     fun getOffersForRequest(requestId: Int): LiveData<List<TutorOffer>> =
         offerDao.getOffersForRequest(requestId)
-import com.example.peertutoringsystem.data.local.OfferDao
-import com.example.peertutoringsystem.data.model.TutorOffer
-
-class OfferRepository(private val offerDao: OfferDao) {
 
     fun getOffersByTutor(tutorId: Int): LiveData<List<TutorOffer>> =
         offerDao.getOffersByTutor(tutorId)
@@ -77,11 +73,7 @@ class OfferRepository(private val offerDao: OfferDao) {
         return true
     }
 
-    // "Mathematics,Physics" -> does it contain the request's subject?
-    private fun teachesSubject(tutorSubjects: String, requestSubject: String): Boolean =
-        tutorSubjects.split(",").map { it.trim() }
-            .any { it.equals(requestSubject.trim(), ignoreCase = true) }
-}
+    // Helper functions merged from the second class
     suspend fun updateOffer(offer: TutorOffer) {
         offerDao.updateOffer(offer)
     }
@@ -98,4 +90,9 @@ class OfferRepository(private val offerDao: OfferDao) {
     suspend fun getOfferById(offerId: Int): TutorOffer? {
         return offerDao.getOfferById(offerId)
     }
+
+    // "Mathematics,Physics" -> does it contain the request's subject?
+    private fun teachesSubject(tutorSubjects: String, requestSubject: String): Boolean =
+        tutorSubjects.split(",").map { it.trim() }
+            .any { it.equals(requestSubject.trim(), ignoreCase = true) }
 }
