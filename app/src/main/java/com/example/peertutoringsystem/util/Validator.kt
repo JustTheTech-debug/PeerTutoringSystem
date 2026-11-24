@@ -1,4 +1,4 @@
-package com.example.peertutor.util
+package com.example.peertutoringsystem.util
 
 object Validator {
 
